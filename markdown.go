@@ -158,7 +158,7 @@ func upsertGitHubPullRequestComment(profiles []*cover.Profile, path string) erro
 	}
 	owner := _repo[0]
 	repo := _repo[1]
-	comments, _, err := gc.Issues.ListComments(ctx, owner, repo, pr.GetNumber(), nil)
+	comments, _, err := gc.PullRequests.ListComments(ctx, owner, repo, pr.GetNumber(), nil)
 	if err != nil {
 		return err
 	}
@@ -172,14 +172,14 @@ func upsertGitHubPullRequestComment(profiles []*cover.Profile, path string) erro
 	}
 	body := buf.String()
 	if commentID == 0 {
-		_, _, err := gc.Issues.CreateComment(ctx, owner, repo, pr.GetNumber(), &github.IssueComment{
+		_, _, err := gc.PullRequests.CreateComment(ctx, owner, repo, pr.GetNumber(), &github.IssueComment{
 			Body: &body,
 		})
 		if err != nil {
 			return err
 		}
 	} else {
-		_, _, err := gc.Issues.EditComment(ctx, owner, repo, commentID, &github.IssueComment{
+		_, _, err := gc.PullRequests.EditComment(ctx, owner, repo, commentID, &github.IssueComment{
 			Body: &body,
 		})
 		if err != nil {
