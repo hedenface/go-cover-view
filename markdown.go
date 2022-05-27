@@ -161,6 +161,9 @@ func upsertGitHubPullRequestComment(profiles []*cover.Profile, path string) erro
 	comments, _, err := gc.PullRequests.ListComments(ctx, owner, repo, pr.GetNumber(), nil)
 	if err != nil {
 		return err
+	} else {
+		fmt.Printf("got pr number %d\n", pr.GetNumber())
+		return nil
 	}
 	var commentID int64
 	for _, c := range comments {
