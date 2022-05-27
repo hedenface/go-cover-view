@@ -11,7 +11,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/google/go-github/v32/github"
+	"github.com/google/go-github/v45/github"
 	"golang.org/x/oauth2"
 	"golang.org/x/tools/cover"
 )
