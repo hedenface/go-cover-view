@@ -1,4 +1,4 @@
-module github.com/johejo/go-cover-view
+module github.com/hedenface/go-cover-view
 
 go 1.14
 
