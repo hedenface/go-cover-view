@@ -94,10 +94,15 @@ func upsertGitHubPullRequestComment(profiles []*cover.Profile, path string) erro
 		return err
 	}
 	defer f.Close()
+
+//cannot unmarshal string into Go struct field Repository.repository.organization of type github.Organization
+	fmt.Println("testing1")
 	var event github.PullRequestEvent
 	if err := json.NewDecoder(f).Decode(&event); err != nil {
+		fmt.Println("errrrrriirr")
 		return err
 	}
+	fmt.Println("testing1")
 	ctx := context.Background()
 	token := os.Getenv("GITHUB_TOKEN")
 	if token == "" {
