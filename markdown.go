@@ -135,6 +135,14 @@ func upsertGitHubPullRequestComment(profiles []*cover.Profile, path string) erro
 	if err != nil {
 		return err
 	}
+
+	ref := os.Getenv("GITHUB_REF")
+	if ref == "" {
+		return errors.New("env: GITHUB_REF is missing")
+	} else {
+		fmt.Printf("got ref: [%s]", ref)
+		return nil
+	}
 	
 	ctx := context.Background()
 	token := os.Getenv("GITHUB_TOKEN")
