@@ -93,6 +93,7 @@ func _main() error {
 	switch ci {
 	case "github-actions":
 		gitDiffOnly = true
+		submitCoverageData(report)
 		return upsertGitHubPullRequestComment(profiles, m.Path())
 	}
 
@@ -272,4 +273,24 @@ func getSimpleReports(profiles []*cover.Profile, path string) ([]*simpleReport, 
 		results = append(results, newSimpleReport(profile.FileName, lines))
 	}
 	return results, nil
+}
+
+func submitCoverageData(report string) {
+	out, err := exec.Command("go", "tool", "cover", "-func", report).Output()
+	if err != nil {
+		return
+	}
+	lines := strings.Split(string(out), "\n")
+	for _, line := range lines {
+		if strings.HasPrefix(line, "total:") {
+			keyValPair := strings.Split(line, ":")
+			//key := strings.TrimSpace(keyValPair[0])
+			val, err := strconv.ParseFloat(strings.TrimSpace(keyValPair[1]), 64)
+			if err == nil {
+				submitDataDog(val)
+			} else {
+				fmt.Printf("Error: %v", err)
+			}
+		}
+	}
 }

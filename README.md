@@ -1,9 +1,11 @@
 # go-cover-view
 
+This was forked from [johejo/go-cover-view](https://github.com/johejo/go-cover-view) for a few reasons:
 
-[![ci](https://github.com/johejo/go-cover-view/workflows/ci/badge.svg?branch=master)](https://github.com/johejo/go-cover-view/actions?query=workflow%3Aci)
-[![codecov](https://codecov.io/gh/johejo/go-cover-view/branch/master/graph/badge.svg)](https://codecov.io/gh/johejo/go-cover-view)
-[![Go Report Card](https://goreportcard.com/badge/github.com/johejo/go-cover-view)](https://goreportcard.com/report/github.com/johejo/go-cover-view)
+1. The original didn't have support for org repos
+2. I think #2 is related to #1, but the event data didn't contain the PR number - or possibly this is because of just a different flow in general
+3. Need support for multiple comments and the ability to view percentage (this is not implemented yet)
+4. The ability to forward coverage information to a datadog metric
 
 simple go coverage report viewer
 
@@ -192,3 +194,4 @@ MIT
 ## Author
 
 Mitsuo Heijo (@johejo)
+Bryan Heden (@hedenface)

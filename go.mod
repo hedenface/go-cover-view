@@ -3,6 +3,7 @@ module github.com/hedenface/go-cover-view
 go 1.14
 
 require (
+	github.com/DataDog/datadog-api-client-go v1.14.0 // indirect
 	github.com/google/go-github/v45 v45.0.0
 	github.com/stretchr/testify v1.7.1
 	golang.org/x/mod v0.5.1
