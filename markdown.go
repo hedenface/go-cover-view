@@ -116,7 +116,7 @@ func upsertGitHubPullRequestComment(profiles []*cover.Profile, path string) erro
 
 	owner := _repo[0]
 	repo := _repo[1]
-	comments, _, err := gc.PullRequests.ListComments(ctx, owner, repo, prNumber, nil)
+	comments, _, err := gc.Issues.ListComments(ctx, owner, repo, prNumber, nil)
 	if err != nil {
 		return err
 	}
