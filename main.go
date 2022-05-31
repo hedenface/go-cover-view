@@ -287,7 +287,8 @@ func submitCoverageData(report string) {
 		if strings.HasPrefix(line, "total:") {
 			keyValPair := strings.Split(line, ":")
 			//key := strings.TrimSpace(keyValPair[0])
-			_val := strings.Replace(keyValPair[1], "(statements)", "", 1)
+			_val := strings.ReplaceAll(keyValPair[1], "(statements)", "")
+			_val = strings.ReplaceAll(_val, "%", "")
 			val, err := strconv.ParseFloat(strings.TrimSpace(_val), 64)
 			if err == nil {
 				submitDataDog(val)
