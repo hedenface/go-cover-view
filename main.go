@@ -293,7 +293,7 @@ func submitCoverageData(report string) {
 			if err == nil {
 				submitDataDog(val)
 			} else {
-				fmt.Printf("Error: %v", err)
+				fmt.Printf("Error: %v\n", err)
 			}
 		}
 	}

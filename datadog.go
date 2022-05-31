@@ -28,6 +28,16 @@ func submitDataDog(coveragePercentage float64) {
 		return
 	}
 
+	projectType := os.Getenv("PROJECT_TYPE")
+	if projectType == "" {
+		fmt.Println("env PROJECT_TYPE not set! Must be one of BP, CP, or IP!")
+		return
+	}
+	if projectType != "Backend" && projectType != "Frontend" && vertical != "Other" {
+		fmt.Printf("env PROJECT_TYPE set to '%s'! Must be one of Backend, Frontend, or Other!\n", projectType)
+		return	
+	}
+
 	body := datadog.MetricPayload{
 		Series: []datadog.MetricSeries{
 			{
@@ -41,6 +51,7 @@ func submitDataDog(coveragePercentage float64) {
 				},
 				Tags: []string{
 					fmt.Sprintf("Project:%s", project),
+					fmt.Sprintf("ProjectType:%s", projectType),
 					fmt.Sprintf("Vertical:%s", vertical),
 				},
 			},
