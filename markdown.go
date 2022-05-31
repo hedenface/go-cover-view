@@ -136,6 +136,7 @@ func upsertGitHubPullRequestComment(profiles []*cover.Profile, path string) erro
 			Body: &body,
 		})
 		if err != nil {
+			fmt.Printf("Returning err from CreateComment")
 			return err
 		}
 	} else {
@@ -143,6 +144,7 @@ func upsertGitHubPullRequestComment(profiles []*cover.Profile, path string) erro
 			Body: &body,
 		})
 		if err != nil {
+			fmt.Printf("Returning err from EditComment")
 			return err
 		}
 	}
