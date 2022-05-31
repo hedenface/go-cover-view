@@ -3,13 +3,12 @@ package main
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"strings"
+	"strconv"
 	"text/template"
 
 	"github.com/google/go-github/v45/github"
@@ -85,65 +84,15 @@ func buildReport(lines []string) string {
 	return b.String()
 }
 
-func stripOrg(byteString []byte) []byte {
-	// https://github.com/K-Phoen/semver-release-action/pull/36/files
-	// workaround for https://github.com/google/go-github/issues/131
-	var o map[string]interface{}
-	_ = json.Unmarshal(byteString, &o)
-	if o != nil {
-		repo := o["repository"]
-		if repo != nil {
-			if repo, ok := repo.(map[string]interface{}); ok {
-				delete(repo, "organization")
-			}
-		}
-	}
-	b, _ := json.MarshalIndent(o, "", "  ")
-	return b
-}
-
-func getPullRequestEvent() (github.PullRequestEvent, error) {
-	var event github.PullRequestEvent
-
-	eventPath := os.Getenv("GITHUB_EVENT_PATH")
-	if eventPath == "" {
-		return event, errors.New("env: GITHUB_EVENT_PATH is missing")
-	}	
-
-	f, err := os.Open(eventPath)
-	if err != nil {
-		return event, err
-	}
-	defer f.Close()
-
-	contents, err := ioutil.ReadAll(f)
-	if err != nil {
-		return event, err
-	}
-
-	jsonOrgStripped := stripOrg(contents)
-
-	if err := json.Unmarshal(jsonOrgStripped, &event); err != nil {
-		return event, err
-	}
-
-	return event, nil
-}
-
 func upsertGitHubPullRequestComment(profiles []*cover.Profile, path string) error {
-	event, err := getPullRequestEvent()
+	prNumber, err := strconv.Atoi(os.Getenv("PR_NUMBER"))
 	if err != nil {
 		return err
 	}
-
-	ref := os.Getenv("GITHUB_REF")
-	if ref == "" {
-		return errors.New("env: GITHUB_REF is missing")
-	} else {
-		fmt.Printf("got ref: [%s]", ref)
-		return nil
+	if prNumber <= 0 {
+		return errors.New("env: missing PR_NUMBER")
 	}
-	
+
 	ctx := context.Background()
 	token := os.Getenv("GITHUB_TOKEN")
 	if token == "" {
@@ -159,20 +108,19 @@ func upsertGitHubPullRequestComment(profiles []*cover.Profile, path string) erro
 	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
 	httpClient := oauth2.NewClient(ctx, ts)
 	gc := github.NewClient(httpClient)
-	pr := event.GetPullRequest()
+
 	_repo := strings.Split(os.Getenv("GITHUB_REPOSITORY"), "/")
 	if len(_repo) != 2 {
 		return fmt.Errorf("invalid env: GITHUB_REPOSITORY=%v", _repo)
 	}
+
 	owner := _repo[0]
 	repo := _repo[1]
-	comments, _, err := gc.PullRequests.ListComments(ctx, owner, repo, pr.GetNumber(), nil)
+	comments, _, err := gc.PullRequests.ListComments(ctx, owner, repo, prNumber, nil)
 	if err != nil {
 		return err
-	} else {
-		fmt.Printf("got pr number %d\n", pr.GetNumber())
-		return nil
 	}
+
 	var commentID int64
 	for _, c := range comments {
 		u := c.GetUser()
@@ -183,7 +131,7 @@ func upsertGitHubPullRequestComment(profiles []*cover.Profile, path string) erro
 	}
 	body := buf.String()
 	if commentID == 0 {
-		_, _, err := gc.PullRequests.CreateComment(ctx, owner, repo, pr.GetNumber(), &github.PullRequestComment{
+		_, _, err := gc.PullRequests.CreateComment(ctx, owner, repo, prNumber, &github.PullRequestComment{
 			Body: &body,
 		})
 		if err != nil {
