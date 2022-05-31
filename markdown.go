@@ -129,25 +129,25 @@ func upsertGitHubPullRequestComment(profiles []*cover.Profile, path string) erro
 			break
 		}
 	}
-	fmt.Printf("Got PR Number: %d, Comment ID: %d", prNumber, commentID)
+	fmt.Printf("Got PR Number: %d, Comment ID: %d\n", prNumber, commentID)
 
 	// The Issues API is what manages comments for PRs
 	// The PR API only handles commenting on the code diff
 	body := buf.String()
 	if commentID == 0 {
-		_, _, err := gc.Issues.CreateComment(ctx, owner, repo, prNumber, &github.PullRequestComment{
+		_, _, err := gc.Issues.CreateComment(ctx, owner, repo, prNumber, &github.IssueComment{
 			Body: &body,
 		})
 		if err != nil {
-			fmt.Printf("Returning err from CreateComment")
+			fmt.Println("Returning err from CreateComment")
 			return err
 		}
 	} else {
-		_, _, err := gc.Issues.EditComment(ctx, owner, repo, commentID, &github.PullRequestComment{
+		_, _, err := gc.Issues.EditComment(ctx, owner, repo, commentID, &github.IssueComment{
 			Body: &body,
 		})
 		if err != nil {
-			fmt.Printf("Returning err from EditComment")
+			fmt.Println("Returning err from EditComment")
 			return err
 		}
 	}
