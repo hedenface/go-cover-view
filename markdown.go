@@ -129,6 +129,7 @@ func upsertGitHubPullRequestComment(profiles []*cover.Profile, path string) erro
 			break
 		}
 	}
+	fmt.Printf("Got PR Number: %d, Comment ID: %d", prNumber, commentID)
 	body := buf.String()
 	if commentID == 0 {
 		_, _, err := gc.PullRequests.CreateComment(ctx, owner, repo, prNumber, &github.PullRequestComment{
