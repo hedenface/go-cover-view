@@ -282,10 +282,13 @@ func submitCoverageData(report string) {
 	}
 	lines := strings.Split(string(out), "\n")
 	for _, line := range lines {
+		// we're looking for a line that says:
+		// total: (statements) 0.0%
 		if strings.HasPrefix(line, "total:") {
 			keyValPair := strings.Split(line, ":")
 			//key := strings.TrimSpace(keyValPair[0])
-			val, err := strconv.ParseFloat(strings.TrimSpace(keyValPair[1]), 64)
+			_val := strings.Replace(keyValPair[1], "(statements)", "", 1)
+			val, err := strconv.ParseFloat(strings.TrimSpace(_val), 64)
 			if err == nil {
 				submitDataDog(val)
 			} else {
