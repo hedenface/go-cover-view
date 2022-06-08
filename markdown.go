@@ -121,7 +121,8 @@ func upsertGitHubPullRequestComment(profiles []*cover.Profile, path string) erro
 	for _, c := range comments {
 		u := c.GetUser()
 		fmt.Printf("Got comment user login: [%s], type: [%s]\n", u.GetLogin(), u.GetType())
-		if u.GetLogin() == "github-actions[bot]" && u.GetType() == "Bot" && strings.Contains(c.GetBody(), "# go-cover-view") {
+		login := u.GetLogin()
+		if (login == "rStheBot" || login == "github-actions[bot]") && strings.Contains(c.GetBody(), "# go-cover-view") {
 			commentID = c.GetID()
 			break
 		}

@@ -69,7 +69,7 @@ jobs:
           PROJECT_TYPE: "Backend" # can be Backend, Frontend, or Other
         run: |
           git fetch origin main
-          go install github.com/hedenface/go-cover-view@2.0.0
+          go install github.com/hedenface/go-cover-view@2.0.1
           go-cover-view -git-diff-base origin/main
 ```
 
