@@ -9,6 +9,8 @@ This was forked from [johejo/go-cover-view](https://github.com/johejo/go-cover-v
 
 simple go coverage report viewer
 
+You can see [the changelog here](https://github.com/hedenface/go-cover-view/blob/master/CHANGELOG.md).
+
 ## Install
 
 ```
@@ -67,8 +69,7 @@ jobs:
           PROJECT_TYPE: "Backend" # can be Backend, Frontend, or Other
         run: |
           git fetch origin main
-          go get github.com/hedenface/go-cover-view@1.0.0
-          go install github.com/hedenface/go-cover-view
+          go install github.com/hedenface/go-cover-view@2.0.0
           go-cover-view -ci github-actions -git-diff-base origin/main
 ```
 
@@ -78,5 +79,5 @@ MIT
 
 ## Author
 
-Mitsuo Heijo (@johejo)
-Bryan Heden (@hedenface)
+* Mitsuo Heijo (@johejo)
+* Bryan Heden (@hedenface)
