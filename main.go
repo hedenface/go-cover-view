@@ -23,15 +23,12 @@ var (
 	report    string
 	covered   string
 	uncovered string
-
-	output string
-	ci     string
-
-	gitDiffOnly bool
-	gitDiffBase string
-
 	writer io.Writer = os.Stdout
 )
+
+type renderer interface {
+	Render(w io.Writer, profiles []*cover.Profile, path string) error
+}
 
 type _modfile interface {
 	Path() string
@@ -60,19 +57,15 @@ func init() {
 	flag.StringVar(&report, "report", "coverage.txt", "coverage report path")
 	flag.StringVar(&covered, "covered", "O", "prefix for covered line")
 	flag.StringVar(&uncovered, "uncovered", "X", "prefix for uncovered line")
-
-	flag.StringVar(&output, "output", "simple", `output type: available values "simple", "json", "markdown"`)
-	flag.StringVar(&ci, "ci", "", strings.TrimSpace(`
-ci type: available values "", "github-actions"
-github-actions:
-	Comment the markdown report to Pull Request on GitHub.
-`))
-
-	flag.BoolVar(&gitDiffOnly, "git-diff-only", false, "only files with git diff")
-	flag.StringVar(&gitDiffBase, "git-diff-base", "origin/master", "git diff base")
 }
 
 func main() {
+	prNumber := os.Getenv("PR_NUMBER")
+	if prNumber == "" {
+		fmt.Println("No PR_NUMBER environment variable, skipping")
+		return
+	}
+
 	flag.Parse()
 	if err := _main(); err != nil {
 		log.Fatal(err)
@@ -90,26 +83,8 @@ func _main() error {
 		return err
 	}
 
-	switch ci {
-	case "github-actions":
-		gitDiffOnly = true
-		submitCoverageData(report)
-		return upsertGitHubPullRequestComment(profiles, m.Path())
-	}
-
-	var r renderer
-	switch output {
-	case "", "simple":
-		r = &simpleRenderer{}
-	case "json":
-		r = &jsonRenderer{}
-	case "markdown":
-		r = &markdownRenderer{}
-	default:
-		return fmt.Errorf("invalid output type %s", output)
-	}
-
-	return r.Render(writer, profiles, m.Path())
+	submitCoverageData(report)
+	return upsertGitHubPullRequestComment(profiles, m.Path())
 }
 
 func parseModfile() (_modfile, error) {
@@ -193,17 +168,13 @@ func getLines(profile *cover.Profile, module string) ([]string, error) {
 }
 
 func getDiffs() ([]string, error) {
-	if !gitDiffOnly {
-		return []string{}, nil
-	}
 	args := []string{"diff", "--name-only"}
-	if gitDiffBase != "" {
-		args = append(args, gitDiffBase)
-	}
+
 	_out, err := exec.Command("git", args...).Output()
 	if err != nil {
 		return nil, err
 	}
+
 	out := strings.TrimSpace(string(_out))
 	diffs := strings.Split(out, "\n")
 	return diffs, nil
@@ -217,62 +188,6 @@ func containsDiff(filename, path string, diffs []string) bool {
 		}
 	}
 	return false
-}
-
-type renderer interface {
-	Render(w io.Writer, profiles []*cover.Profile, path string) error
-}
-
-type simpleRenderer struct{}
-
-var _ renderer = (*simpleRenderer)(nil)
-
-func (r *simpleRenderer) Render(w io.Writer, profiles []*cover.Profile, path string) error {
-	reports, err := getSimpleReports(profiles, path)
-	if err != nil {
-		return err
-	}
-	bw := bufio.NewWriter(w)
-	for _, r := range reports {
-		fmt.Fprintln(bw, r.FileName)
-		fmt.Fprintln(bw, r.Report)
-		fmt.Fprintln(bw)
-	}
-	return bw.Flush()
-}
-
-type simpleReport struct {
-	FileName string
-	Report   string
-}
-
-func newSimpleReport(fileName string, lines []string) *simpleReport {
-	return &simpleReport{
-		FileName: fileName,
-		Report:   strings.Join(lines, "\n"),
-	}
-}
-
-func getSimpleReports(profiles []*cover.Profile, path string) ([]*simpleReport, error) {
-	diffs, err := getDiffs()
-	if err != nil {
-		return nil, err
-	}
-	results := make([]*simpleReport, 0, len(profiles))
-	for _, profile := range profiles {
-		lines, err := getLines(profile, path)
-		if err != nil {
-			return nil, err
-		}
-		if gitDiffOnly {
-			if containsDiff(profile.FileName, path, diffs) {
-				results = append(results, newSimpleReport(profile.FileName, lines))
-			}
-			continue
-		}
-		results = append(results, newSimpleReport(profile.FileName, lines))
-	}
-	return results, nil
 }
 
 func submitCoverageData(report string) {

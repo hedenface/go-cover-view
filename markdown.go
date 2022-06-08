@@ -61,13 +61,9 @@ func getMarkdownReports(profiles []*cover.Profile, path string) ([]*markdownRepo
 		if err != nil {
 			return nil, err
 		}
-		if gitDiffOnly {
-			if containsDiff(profile.FileName, path, diffs) {
-				reports = append(reports, newMarkdownReport(profile.FileName, lines))
-			}
-			continue
+		if containsDiff(profile.FileName, path, diffs) {
+			reports = append(reports, newMarkdownReport(profile.FileName, lines))
 		}
-		reports = append(reports, newMarkdownReport(profile.FileName, lines))
 	}
 	return reports, nil
 }
