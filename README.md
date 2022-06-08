@@ -70,7 +70,7 @@ jobs:
         run: |
           git fetch origin main
           go install github.com/hedenface/go-cover-view@2.0.0
-          go-cover-view -ci github-actions -git-diff-base origin/main
+          go-cover-view -git-diff-base origin/main
 ```
 
 ## License
