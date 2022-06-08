@@ -19,10 +19,11 @@ import (
 )
 
 var (
-	modFile   string
-	report    string
-	covered   string
-	uncovered string
+	modFile     string
+	report      string
+	covered     string
+	uncovered   string
+	gitDiffBase string
 	writer io.Writer = os.Stdout
 )
 
@@ -57,6 +58,7 @@ func init() {
 	flag.StringVar(&report, "report", "coverage.txt", "coverage report path")
 	flag.StringVar(&covered, "covered", "O", "prefix for covered line")
 	flag.StringVar(&uncovered, "uncovered", "X", "prefix for uncovered line")
+	flag.StringVar(&gitDiffBase, "git-diff-base", "origin/master", "git diff base")
 }
 
 func main() {
@@ -169,6 +171,10 @@ func getLines(profile *cover.Profile, module string) ([]string, error) {
 
 func getDiffs() ([]string, error) {
 	args := []string{"diff", "--name-only"}
+
+	if gitDiffBase != "" {
+		args = append(args, gitDiffBase)
+	}
 
 	_out, err := exec.Command("git", args...).Output()
 	if err != nil {
